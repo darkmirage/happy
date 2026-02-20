@@ -11,6 +11,7 @@ import { createServer } from "node:http";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { AddressInfo } from "node:net";
 import { z } from "zod";
+import { hostname } from "node:os";
 import { logger } from "@/ui/logger";
 import { ApiSessionClient } from "@/api/apiSession";
 import { randomUUID } from "node:crypto";
@@ -20,12 +21,13 @@ export async function startHappyServer(client: ApiSessionClient) {
 
     // Handler that sends title updates via the client
     const handler = async (title: string) => {
-        logger.debug('[happyMCP] Changing title to:', title);
+        const prefixedTitle = `[${hostname()}] ${title}`;
+        logger.debug('[happyMCP] Changing title to:', prefixedTitle);
         try {
             // Send title as a summary message, similar to title generator
             client.sendClaudeSessionMessage({
                 type: 'summary',
-                summary: title,
+                summary: prefixedTitle,
                 leafUuid: randomUUID()
             });
 
