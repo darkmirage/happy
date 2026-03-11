@@ -208,7 +208,7 @@ export class CodexMcpClient {
                 if (!this.permissionHandler) {
                     logger.debug('[CodexMCP] No permission handler set, denying by default');
                     return {
-                        decision: 'denied' as const,
+                        action: 'decline' as const,
                     };
                 }
 
@@ -224,14 +224,19 @@ export class CodexMcpClient {
                     );
 
                     logger.debug('[CodexMCP] Permission result:', result);
+                    const actionMap: Record<string, 'accept' | 'decline' | 'cancel'> = {
+                        'approved': 'accept',
+                        'approved_for_session': 'accept',
+                        'denied': 'decline',
+                        'abort': 'cancel',
+                    };
                     return {
-                        decision: result.decision
+                        action: actionMap[result.decision] ?? 'decline'
                     }
                 } catch (error) {
                     logger.debug('[CodexMCP] Error handling permission request:', error);
                     return {
-                        decision: 'denied' as const,
-                        reason: error instanceof Error ? error.message : 'Permission request failed'
+                        action: 'decline' as const,
                     };
                 }
             }
